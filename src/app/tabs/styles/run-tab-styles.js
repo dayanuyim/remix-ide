@@ -57,17 +57,20 @@ var css = csjs`
     ${styles.rightPanel.runTab.box_Instance}
     display: flex;
     flex-direction: column;
-    margin-top: 2%;
+    margin-bottom: 2%;
     border: none;
     text-align: center;
     padding: 10px 0px 15px 15px;
   }
   .instanceContainerTitle {
-    font-size: 20px;
     font-weight: bold;
     margin-bottom: 5%;
     font-size: 12px;
-    text-align: left;
+    display: flex;
+    justify-content: space-between;
+  }
+  .recorderContainerTitle {
+    font-size: 12px;
     display: flex;
     justify-content: space-between;
   }
@@ -82,10 +85,11 @@ var css = csjs`
   .recorderContainer {
     ${styles.rightPanel.runTab.box_Instance};
     padding: 10px 0px 15px 15px;
+    margin-bottom: 2%;
   }
   .container {
     ${styles.rightPanel.runTab.box_RunTab}
-    margin-top: 2%;
+    margin-bottom: 2%;
   }
   .contractNames {
     ${styles.rightPanel.runTab.dropdown_RunTab}

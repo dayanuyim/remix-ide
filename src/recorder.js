@@ -6,7 +6,6 @@ var format = remixLib.execution.txFormat
 var txHelper = remixLib.execution.txHelper
 var async = require('async')
 var modal = require('./app/ui/modal-dialog-custom')
-
 /**
   * Record transaction as long as the user create them.
   *
@@ -131,6 +130,7 @@ class Recorder {
   append (timestamp, record) {
     var self = this
     self.data.journal.push({ timestamp, record })
+    self.event.trigger('showtxRecordedCount', [self.data.journal.length])
   }
 
   /**

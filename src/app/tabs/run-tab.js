@@ -34,16 +34,21 @@ function runTab (appAPI = {}, appEvents = {}, opts = {}) {
   /* -------------------------
             VARIABLES
   --------------------------- */
+  var self = this
+  self._view = {}
+  self._view.txRecorderCount = yo`<span>0 Events Recorded</span>`
   var container = yo`<div class="${css.runTabView}" id="runTabView" ></div>`
-  var recorderInterface = makeRecorder(event, appAPI, appEvents)
+  var recorderInterface = makeRecorder(event, appAPI, appEvents, self)
   var recorderContainer = yo`
     <div class="${css.recorderContainer}">
-      <span class="${css.transactionActions}">
+      <div class=${css.recorderContainerTitle} title="">
+        ${self._view.txRecorderCount}
+      </div>
+      <div class="${css.transactionActions}">
         ${recorderInterface.recordButton}
         ${recorderInterface.runButton}
-      </span>
+      </div>
     </div>`
-
     /* -------------------------
          MAIN HTML ELEMENT
     --------------------------- */
@@ -137,7 +142,7 @@ function updateAccountBalances (container, appAPI) {
 /* ------------------------------------------------
            RECORDER
 ------------------------------------------------ */
-function makeRecorder (events, appAPI, appEvents) {
+function makeRecorder (events, appAPI, appEvents, self) {
   var recorder = new Recorder({
     events: {
       udapp: appEvents.udapp,
@@ -146,11 +151,13 @@ function makeRecorder (events, appAPI, appEvents) {
     },
     api: appAPI
   })
+  recorder.event.register('showtxRecordedCount', (count) => {
+    self._view.txRecorderCount.innerText = count + ' Events Recorded'
+  })
   var css2 = csjs`
-    .container,
-    .runTxs,
-    .recorder {
-    }
+    .container {}
+    .runTxs {}
+    .recorder {}
   `
 
   var recordButton = yo`
