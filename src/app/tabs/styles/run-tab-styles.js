@@ -83,9 +83,6 @@ var css = csjs`
     text-align: center;
   }
   .recorderContainer {
-    ${styles.rightPanel.runTab.box_Instance};
-    padding: 10px 0px 15px 15px;
-    margin-bottom: 2%;
   }
   .container {
     ${styles.rightPanel.runTab.box_RunTab}
