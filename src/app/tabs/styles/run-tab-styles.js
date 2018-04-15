@@ -69,11 +69,6 @@ var css = csjs`
     display: flex;
     justify-content: space-between;
   }
-  .recorderContainerTitle {
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
-  }
   .pendingTxsContainer  {
     ${styles.rightPanel.runTab.box_Instance};
     display: flex;
@@ -82,7 +77,13 @@ var css = csjs`
     border: none;
     text-align: center;
   }
-  .recorderContainer {
+  .recorderCollapsedView,
+  .recorderExpandedView {
+    display: flex;
+    flex-direction: column;
+  }
+  .recorderDescription {
+    margin: 0 15px 15px 0;
   }
   .container {
     ${styles.rightPanel.runTab.box_RunTab}
@@ -197,12 +198,10 @@ var css = csjs`
   }
   .transactionActions {
     display: flex;
-    width: 70px;
-    justify-content: space-between;
-    border: 1px solid ${styles.rightPanel.runTab.additionalText_Color};
-    padding: 5px;
-    border-radius: 3px;
-}
+    justify-content: space-evenly;
+    ${styles.rightPanel.runTab.box_Info_RunTab};
+    width: 145px;
+  }
 `
 
 module.exports = css

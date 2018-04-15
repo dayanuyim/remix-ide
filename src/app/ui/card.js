@@ -2,6 +2,7 @@ var yo = require('yo-yo')
 var csjs = require('csjs-inject')
 var styleGuide = require('./styles-guide/theme-chooser')
 var styles = styleGuide.chooser()
+var remixLib = require('remix-lib')
 var EventManager = remixLib.EventManager
 
 module.exports = class Card {
@@ -17,35 +18,26 @@ module.exports = class Card {
     const self = this
     if (self._view.el) return self._view.el
 
-    self._view.collapsedView = self._opts.collapsedView()
-    self._view.expandedView = self._opts.expandedView()
-
-    self._view.arrowUp = yo`
-      <i class="${css.arrowUp} fa fa-angle-up"
-      onclick=${(ev) => self.event.trigger('expandCollapseCard', [ev])}>
-      </i>`
-    self._view.arrowDown = yo`
-    <i class="${css.arrowDown} fa fa-angle-down"
-    onclick=${(ev) => self.event.trigger('expandCollapseCard', [ev])}>
-    </i>`
+    self._view.cardBody = yo`<div class=${css.cardBody}>${self._opts.collapsedView}</div>`
+    self._view.arrow = yo`<i class="${css.arrow} fa fa-angle-up"
+    onclick=${(ev) => trigger(ev.target)}></i>`
 
     self._view.expandCollapseButton = yo`
-    <div class=${css.expandCollapseButton}>${self._view.arrowUp}</div>`
+    <div class=${css.expandCollapseButton}>${self._view.arrow}</div>`
 
     self._view.cardHeader = yo`
-      <div class=${css.cardHeader}>
-        <div class=${css.cardTitles}>
-          <div class=${css.cardTitle}>${self._opts.title}</div>
-          <div class=${css.cardSubitle}>${self._opts.subtitle}</div>
-        </div>
-        ${self._view.expandCollapseButton}
-      </div>`
-
-    self._view.cardBody = yo`
-      <div class=${css.cardBody}>
-        ${self._view.collapsedView}
+    <div class=${css.cardHeader}>
+      <div class=${css.cardTitles}>
+        <div class=${css.cardTitle}>${self._opts.title}</div>
       </div>
-    `
+      <div class=${css.expandCollapseButton}>${self._view.expandCollapseButton}</div>
+    </div>`
+
+    function trigger (el) {
+      el.classList.toggle('fa-angle-down')
+      var arrow = el.classList.toggle('fa-angle-up') ? 'down' : 'up'
+      self.event.trigger('expandCollapseCard', [arrow, self._view.cardBody])
+    }
 
     // HTML
     self._view.el = yo`
@@ -56,20 +48,12 @@ module.exports = class Card {
 
     return self._view.el
   }
-  // FUNCTIONS
-  appendExpandedOrCollapsedView () {
-    // var cardBody = self._view.cardBody
-    //self._view.expandCollapseButton.innerHTML = self._view.arrowDown
-    // cardBody.parentNode.removeChild(cardBody)
-    // button.parentNode.removeChild(self._view.cardBody)
-    // self._view.cardBody.appendChild(self._view.cardBody)
-  }
+
 }
 
 const css = csjs`
   .cardContainer {
-    ${styles.rightPanel.runTab.box_Instance};
-    padding             : 10px 0px 15px 15px;
+    ${styles.remix.solidBox};
     margin-bottom       : 2%;
   }
   .cardHeader {
@@ -87,21 +71,15 @@ const css = csjs`
     font-weight         : bold;
     color               : ${styles.appProperties.mainText_Color};
   }
-  .cardSubitle {
-    font-size           : 12px;
-    color               : ${styles.appProperties.supportText_Color};
-  }
   .expandCollapseButton {}
-  .arrowUp,
-  .arrowDown {
+  .arrow {
     margin-right        : 15px;
     color               : ${styles.appProperties.icon_Color};
     font-weight         : bold;
     cursor              : pointer;
     font-size           : 14px;
   }
-  .arrowUp:hover,
-  .arrowDown:hover {
+  .arrow:hover {
     color               : ${styles.appProperties.icon_HoverColor};
   }
 
