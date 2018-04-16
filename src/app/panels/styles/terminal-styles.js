@@ -146,9 +146,8 @@ var css = csjs`
     margin-right      : 30px;
   }
   .pendingTx {
-    background-color  : ${styles.terminal.icon_HoverColor_Menu};
-    border-radius     : 50%;
     margin-right      : 30px;
+    cursor            : default;
   }
   .pendingTxNr {
     width             : 13px;
@@ -157,6 +156,8 @@ var css = csjs`
     font-weight       : bold;
     display           : flex;
     justify-content   : center;
+    border            : 0.5px solid  ${styles.terminal.icon_HoverColor_Menu};
+    border-radius     : 50%;
   }
   .dragbarHorizontal  {
     position          : absolute;

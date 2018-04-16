@@ -77,10 +77,26 @@ var css = csjs`
     border: none;
     text-align: center;
   }
-  .recorderCollapsedView,
+  .recorderCollapsedView {
+    display: flex;
+    flex-direction: row;
+  }
+  .recorderCount {
+    width: 13px;
+    height: 13px;
+    font-size: 8px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    border: 0.5px solid ${styles.rightPanel.runTab.icon_HoverColor};
+    border-radius: 50%;
+    align-items: center;
+    cursor: default;
+  }
   .recorderExpandedView {
     display: flex;
     flex-direction: column;
+    margin-top: 15px;
   }
   .recorderDescription {
     margin: 0 15px 15px 0;
@@ -199,8 +215,9 @@ var css = csjs`
   .transactionActions {
     display: flex;
     justify-content: space-evenly;
+    align-self: center;
     ${styles.rightPanel.runTab.box_Info_RunTab};
-    width: 145px;
+    width: 60%;
   }
 `
 

@@ -28,8 +28,8 @@ function runTab (appAPI = {}, appEvents = {}, opts = {}) {
   self.data = {
     count: 0,
     text: `All transactions (deployed contracts and function calls)
-    executed in this, can be saved and replayed in
-    another environment. For example: transactions created in
+    executed in this environment, can be saved and replayed in
+    another one. Transactions created in i.e.
     Javascript VM can be replayed in the Ropsten network.`
   }
 
@@ -37,7 +37,7 @@ function runTab (appAPI = {}, appEvents = {}, opts = {}) {
   self._view.instanceContainer = yo`<div class="${css.instanceContainer}"></div>`
   self._view.clearInstanceElement = yo`
     <i class="${css.clearinstance} ${css.icon} fa fa-trash" onclick=${() => clearInstanceList(self)}
-    title="Clear Instances List" aria-hidden="true">
+    title="Clear instances list and reset recorder" aria-hidden="true">
   </i>`
   self._view.instanceContainerTitle = yo`
     <div class=${css.instanceContainerTitle}
@@ -55,9 +55,7 @@ function runTab (appAPI = {}, appEvents = {}, opts = {}) {
 
   self._view.collapsedView = yo`
     <div class=${css.recorderCollapsedView}>
-      <div class="${css.transactionActions}">
-        Events Recorded: ${self._view.recorderCount}
-      </div>
+      <div class=${css.recorderCount}>${self._view.recorderCount}</div>
     </div>`
 
   self._view.expandedView = yo`
@@ -73,24 +71,24 @@ function runTab (appAPI = {}, appEvents = {}, opts = {}) {
     </div>`
 
   self.recorderOpts = {
-    title: 'Recorder',
-    subtitle: 'Save and replay your transactions',
+    title: 'Events recorded:',
     collapsedView: self._view.collapsedView
   }
 
   var recorderCard = new Card({}, {}, self.recorderOpts)
-  recorderCard.event.register('expandCollapseCard', (arrow, body) => {
+  recorderCard.event.register('expandCollapseCard', (arrow, body, status) => {
     body.innerHTML = ''
+    status.innerHTML = ''
     if (arrow === 'up') {
+      status.appendChild(self._view.collapsedView)
       body.appendChild(self._view.expandedView)
     } else if (arrow === 'down') {
-      body.appendChild(self._view.collapsedView)
+      status.appendChild(self._view.collapsedView)
     }
   })
     /* -------------------------
          MAIN HTML ELEMENT
     --------------------------- */
-
   var el = yo`
   <div>
     ${settings(container, appAPI, appEvents)}
@@ -110,7 +108,7 @@ function runTab (appAPI = {}, appEvents = {}, opts = {}) {
 
   function clearInstanceList (self) {
     event.trigger('clearInstance', [])
-    self.data.count = 0
+    self._view.recorderCount.innerText = 0
   }
 
   function setFinalContext () {

@@ -10,7 +10,9 @@ var styleGuide = require('./app/ui/styles-guide/theme-chooser')
 var styles = styleGuide.chooser()
 
 module.exports = UniversalDAppUI
+
 // trigger debugRequested
+
 function UniversalDAppUI (udapp, opts = {}) {
   var self = this
   this.udapp = udapp
@@ -34,8 +36,9 @@ UniversalDAppUI.prototype.renderInstance = function (contract, address, contract
 UniversalDAppUI.prototype.renderInstanceFromABI = function (contractABI, address, contractName) {
   // VARIABLES
   var self = this
+
   address = (address.slice(0, 2) === '0x' ? '' : '0x') + address.toString('hex')
-  var instance = yo`<div class="instance ${css.instance}" id="instance${address}"></div>`
+  var instance = yo`<div class="instance ${css.instance} ${css.hidesub}" id="instance${address}"></div>`
   var context = self.udapp.context()
   var shortAddress = helper.shortenAddress(address)
   var title = yo`
@@ -52,9 +55,6 @@ UniversalDAppUI.prototype.renderInstanceFromABI = function (contractABI, address
 
   // FUNCTIONS
   function remove () {
-    var instanceContainer = document.querySelector('[class^="instanceContainer"]')
-    var noInstancesText = yo`<div class="${css.noInstancesText}">Currently you have no contract instances.</div>`
-    instanceContainer.appendChild(noInstancesText)
     instance.remove()
   }
 
@@ -180,10 +180,6 @@ var css = csjs`
   }
   .title .copy {
     color: ${styles.rightPanel.runTab.icon_AltColor_Instance_CopyToClipboard};
-  }
-  .noInstancesText {
-    font-style: italic;
-    text-align: left;
   }
   .instance {
     min-width: 310px;
