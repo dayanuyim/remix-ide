@@ -40,11 +40,10 @@ function testSimpleContract (browser, callback) {
     browser.click('.runView')
       .click('#runTabView div[class^="create"]')
       .pause(500)
-      .click('#runTabView .instance div[class^="title"]')
-      .click('#runTabView .instance div[class^="title"]')
       .testFunction('f - transact (not payable)',
         '0xa178c603400a184ce5fedbcfab392d9b77822f6ffa7facdec693aded214523bc',
-        '[vm] from:0xca3...a733c, to:TestContract.f() 0x692...77b3a, value:0 wei, data:0x261...21ff0, 0 logs, hash:0xa17...523bc', null,
+        '[vm] from:0xca3...a733c, to:TestContract.f() 0x692...77b3a, value:0 wei, data:0x261...21ff0, 0 logs, hash:0xa17...523bc',
+        null,
         `{
  "0": "uint256: 8"
 }`)
@@ -144,8 +143,8 @@ function testInputValues (browser, callback) {
 
 var sources = [
   {'browser/Untitled.sol': {content: `pragma solidity ^0.4.0;
-      contract TestContract { function f() returns (uint) { return 8; } 
-      function g() returns (uint, string, bool, uint) {  
+      contract TestContract { function f() returns (uint) { return 8; }
+      function g() returns (uint, string, bool, uint) {
         uint payment = 345;
         bool payed = true;
         string memory comment = "comment_comment_";
@@ -160,7 +159,7 @@ var sources = [
         _i = -345;
         _a = msg.sender;
     }
-    
+
     function retunValues2 () returns (byte _b, bytes2 _b2, bytes3 _b3, bytes _blit, bytes5 _b5, bytes6 _b6, string _str, bytes7 _b7, bytes22 _b22, bytes32 _b32)  {
         _b = 0x12;
         _b2 = 0x1223;
@@ -172,7 +171,7 @@ var sources = [
         _blit = hex"123498";
         _str = "this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string _ this is a long string";
     }
-    
+
     function retunValues3 () returns (ActionChoices _en, int[5][] _a1)  {
        _en = ActionChoices.GoStraight;
        int[5][] memory a = new int[5][](3);

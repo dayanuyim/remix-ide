@@ -117,8 +117,9 @@ function verifyCallReturnValue (browser, address, checks, done) {
 
 function testFunction (fnFullName, txHash, log, expectedInput, expectedReturn, expectedEvent, callback) {
   // this => browser
-  this.waitForElementPresent('.instance  div[class^="title"]')
-    .click('.instance div[class^="title"]')
+  this
+    .waitForElementPresent('#runTabView .instance div[class^="title"]')
+    .click('#runTabView .instance div[class^="title"]')
     .waitForElementPresent('.instance button[title="' + fnFullName + '"]')
     .perform(function (client, done) {
       client.execute(function () {
@@ -131,6 +132,7 @@ function testFunction (fnFullName, txHash, log, expectedInput, expectedReturn, e
       })
     })
     .click('.instance button[title="' + fnFullName + '"]')
+    .click('#runTabView .instance div[class^="udappClose"]')
     .pause(500)
     .waitForElementPresent('#editor-container div[class^="terminal"] span[id="tx' + txHash + '"]')
     .assert.containsText('#editor-container div[class^="terminal"] span[id="tx' + txHash + '"] span', log)
@@ -141,6 +143,7 @@ function testFunction (fnFullName, txHash, log, expectedInput, expectedReturn, e
       }
       done()
     })
+
     .perform(function (client, done) {
       if (expectedEvent) {
         client.assert.containsText('#editor-container div[class^="terminal"] span[id="tx' + txHash + '"] table[class^="txTable"] #logs', expectedEvent)

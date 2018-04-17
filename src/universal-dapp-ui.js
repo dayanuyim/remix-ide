@@ -276,4 +276,5 @@ var css = csjs`
     border-bottom-right-radius: 0;
     border-right: 0;
   }
+  .call {}
 `
