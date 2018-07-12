@@ -10,42 +10,74 @@ const secuMods = [0, 3, 6, 7, 8, 9, 11] //index of security analysis moduls
 const gasMods = [1, 2]
 const miscMods = [4, 5, 10, 12]
 
-function analyze(compileOutput, isStatOly){
-    if(compileOutput){
-        var runner = new StaticAnalysisRunner()
-        runner.run(compileOutput, secuMods, function (results) {
-            results.map(function (result, i) {
-                console.log(result.name + result.report.length)
-                //each location
-                if(!isStatOly){
-                    result.report.map(function (item, i) {
-                        console.log(`  [${i}] location: ${item.location}`);
-                        console.log(`  [${i}] more: ${item.more}`);
-                        console.log(`  [${i}] warning: ${item.warning}`);
-                    })
-                }
-            /*
-            if (item.location !== undefined) {
-                var split = item.location.split(':')
-                    var file = split[2]
-                    location = {
-                        start: parseInt(split[0]),
-                        length: parseInt(split[1])
-                    }
-                location = self.appAPI.offsetToLineColumn(location, file)
-                    location = Object.keys(self.lastCompilationResult.contracts)[file] + ':' + (location.start.line + 1) + ':' + (location.start.column + 1) + ':'
-            }
-            */
-            })
-        })
-    } else {
-        console.log('No compiled AST available')
+function parseLocation(str){
+    if(str == undefined)
+        return undefined;
+
+    var tokens = str.split(':')
+    return {
+        start: parseInt(tokens[0]),
+        length: parseInt(tokens[1]),
+        file: tokens[2],
     }
 }
 
-function getCompileInput(srcFile){
+function positionToLineNum(content, pos){
+    var line = 1;
+    for(var i = 0; i < pos; ++i){
+        if(content[i] == '\r')
+            line++;
+        else if(content[i] == '\n' && i > 0 && content[i-1] != '\r')
+            line++;
 
-    var content = fs.readFileSync(srcFile, 'utf8')
+    }
+    return line;
+}
+
+function analyze(compileOutput, content, isStatOnly){
+
+    if(!compileOutput){
+        console.log('No compiled AST available');
+        return;
+    }
+
+    var runner = new StaticAnalysisRunner()
+    runner.run(compileOutput, secuMods, function (results) {
+        results.map(function (result, i) {
+            console.log(result.name + result.report.length)
+
+            if(isStatOnly)
+                return;
+
+            //detail information
+            result.report.map(function (item, j) {
+                if(j == 0)
+                    console.log(' ====================================');
+                else
+                    console.log(' ------------------------------------');
+
+                var prefix = ` ${result.name}[${j}]`;
+
+                console.log(` ${prefix} warning: ${item.warning}`);
+                console.log(` ${prefix} more: ${item.more}`);
+
+                var loc = parseLocation(item.location);
+                if(loc == undefined)
+                    console.log(` ${prefix} location: NA`);
+                else{
+                    console.log(` ${prefix} location: line ${positionToLineNum(content, loc.start)}`)
+                    var code = content.substring(loc.start, loc.start + loc.length);
+                    console.log(` ${prefix} code: ${code}`);
+                }
+
+            })
+            console.log('');
+        })
+    })
+}
+
+function genCompileSettings(content){
+
     var obj = {
         "language": "Solidity",
         "sources": {
@@ -70,7 +102,7 @@ function getCompileInput(srcFile){
     return obj
 }
 
-function doCmd(cmd, args, stdin, callback){
+function doCmd(cmd, args, settings, callback){
 
     var proc = spawn(cmd, ['--standard-json'])
 
@@ -89,52 +121,78 @@ function doCmd(cmd, args, stdin, callback){
     });
 
     // feed input
-    proc.stdin.write(stdin)
+    proc.stdin.write(settings)   //settings is inputed from STDIN
     proc.stdin.end()
 }
- 
-// get optoins
-var isStatOly
-var srcFile
-if(process.argv.length == 3){
-    isStatOly = false
-    srcFile = process.argv[2]
-}
-else if(process.argv.length == 4 && process.argv[2] == '--stat-only'){
-    isStatOly = true
-    srcFile = process.argv[3]
-}
-else{
-    console.log("usage: node run_remix_analysis.js [--stat-only] <sol>")
-    return 1
-}
 
-var compileInput = getCompileInput(srcFile)
-
-var solc = doCmd('solc', ['--standard-json'], JSON.stringify(compileInput), (code, stderr, stdout) => {
-
-    if(code != 0 || stderr){
-        console.log(`run solc error (${code}): ${stderr}`)
-        return;
+function CompileException(code, message) {
+    this.code = code;
+    this.message = message;
+    this.toString = function(){
+        return this.code + ": " + this.message;
     }
-    //get compile output
-    var compileOutput = JSON.parse(stdout)
-    //analyze
-    analyze(compileOutput, isStatOly)
-})
+}
 
-//run
-/*
-var solc = exec('solc --standard-json', {maxBuffer: 1024 * 1024 * 2}, (err, stdout, stderr) => {
-      if (err) {
-          console.log("run solc error: " + err)
-          return
-      }
-      //get compile output
-      var compileOutput = JSON.parse(stdout)
-      //analyze
-      analyze(compileOutput, isStatOly)
-})
-solc.stdin.write(JSON.stringify(compileInput))
-solc.stdin.end()
-*/
+function compile(content, analyzer){
+
+    var settings = genCompileSettings(content)
+
+    var solc = doCmd('solc', ['--standard-json'], JSON.stringify(settings), (code, stderr, stdout) => {
+
+        if(code != 0 || stderr){
+            console.log(`run solc error (${code}): ${stderr}`);
+            throw new CompileException(code, stderr);
+        }
+
+        var compileResult = JSON.parse(stdout)
+
+        //analyze
+        analyzer(compileResult);
+    })
+}
+ 
+function indexOf(arr, val){
+    for(var i = 0; i < arr.length; ++i){
+        if(arr[i] == val)
+            return i;
+    }
+    return -1;
+}
+
+function extractBoolArg(argv, optName){
+    var idx = indexOf(argv, optName);
+    if(idx < 0)
+        return false;
+    else{
+        argv.splice(idx, 1);
+        return true;
+    }
+}
+
+function extractArgAtPos(argv, pos){
+    if(pos < 0)
+        pos += argv.length;
+
+    var arg = argv[pos];
+    argv.splice(pos, 1);
+    return arg;
+}
+ 
+function main(argv){
+
+    var isStatOnly = extractBoolArg(argv, '--stat-only');
+
+    // get optoins
+    if(argv.length != 3){  // [0]: node, [1]: the js file, [2]: src file
+        console.log("usage: node run_remix_analysis.js [--stat-only] <sol>")
+        return 1
+    }
+
+    var srcFile = extractArgAtPos(argv, -1);
+    var content = fs.readFileSync(srcFile, 'utf8');
+
+    compile(content, (compileResult) => analyze(compileResult, content, isStatOnly));
+}
+
+main(process.argv);
+
